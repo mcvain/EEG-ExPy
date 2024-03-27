@@ -94,12 +94,34 @@ class EEG:
             self._init_muselsl()
             self._muse_get_recent()  # run this at initialization to get some
             # stream metadata into the eeg class
+        elif self.backend == "generic":
+            self._init_generic()
 
     def _get_backend(self, device_name):
         if device_name in brainflow_devices:
             return "brainflow"
         elif device_name in ["muse2016", "muse2", "museS"]:
             return "muselsl"
+        elif device_name == "generic":
+            return "generic"
+        else:
+            return "generic"
+
+    ### Generic functions to get EEG-ExPy working without a supported device, use LabRecorder to record data
+    def _init_generic(self):
+        # self.sfreq = 250
+        # self.n_chans = 8
+        # self.info = None 
+        pass   
+
+    def _start_generic(self):
+        self.StreamInfo = StreamInfo(
+            "Markers (Generic EEG Experiment)", "Markers", 1, 0, "int32", "myuidw43536"
+        )
+        self.StreamOutlet = StreamOutlet(self.StreamInfo)
+
+    def _generic_push_sample(self, marker, timestamp):
+        self.StreamOutlet.push_sample(marker, timestamp)
 
     #####################
     #   MUSE functions  #
@@ -408,6 +430,8 @@ class EEG:
             self.markers = []
         elif self.backend == "muselsl":
             self._start_muse(duration)
+        elif self.backend == "generic":
+            self._start_generic()
 
     def push_sample(self, marker, timestamp):
         """
@@ -421,12 +445,16 @@ class EEG:
             self._brainflow_push_sample(marker=marker)
         elif self.backend == "muselsl":
             self._muse_push_sample(marker=marker, timestamp=timestamp)
+        elif self.backend == "generic":
+            self._generic_push_sample(marker=marker, timestamp=timestamp)
 
     def stop(self):
         if self.backend == "brainflow":
             self._stop_brainflow()
         elif self.backend == "muselsl":
             pass
+        elif self.backend == "generic":
+            ~self.StreamOutlet()  # destroys the stream
 
     def get_recent(self, n_samples: int = 256):
         """

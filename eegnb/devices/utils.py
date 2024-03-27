@@ -27,6 +27,7 @@ EEG_CHANNELS = {
     "notion2": BoardShim.get_eeg_names(BoardIds.NOTION_2_BOARD.value),
     "crown": BoardShim.get_eeg_names(BoardIds.CROWN_BOARD.value),
     "freeeeg32": [f"eeg_{i}" for i in range(0, 32)],
+    "generic": [None],
 }
 
 BRAINFLOW_CHANNELS = {
@@ -56,6 +57,7 @@ EEG_INDICES = {
     "notion2": BoardShim.get_eeg_channels(BoardIds.NOTION_2_BOARD.value),
     "crown": BoardShim.get_eeg_channels(BoardIds.CROWN_BOARD.value),
     "freeeeg32": BoardShim.get_eeg_channels(BoardIds.FREEEEG32_BOARD.value),
+    "generic": [0],
 }
 
 SAMPLE_FREQS = {
@@ -78,6 +80,7 @@ SAMPLE_FREQS = {
     "notion2": BoardShim.get_sampling_rate(BoardIds.NOTION_2_BOARD.value),
     "crown": BoardShim.get_sampling_rate(BoardIds.CROWN_BOARD.value),
     "freeeeg32": BoardShim.get_sampling_rate(BoardIds.FREEEEG32_BOARD.value),
+    "generic": 250,
 }
 
 

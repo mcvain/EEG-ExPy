@@ -12,13 +12,19 @@ an experiment.
 # ---------------------  
 #  
 # Imports
+import sys
+sys.path
+sys.path.append(r'C:\Users\mcvai\EEG-ExPy')
 import os
 from eegnb import generate_save_fn
 from eegnb.devices.eeg import EEG
 from eegnb.experiments import VisualSSVEP
 
+
+
 # Define some variables
-board_name = "muse2"
+# board_name = "muse2"
+board_name = "generic"
 experiment = "visual_ssvep"
 subject_id = 0
 session_nb = 0
@@ -40,4 +46,5 @@ print(save_fn)
 # ---------------------  
 #  
 ssvep = VisualSSVEP(duration=record_duration, eeg=eeg_device, save_fn=save_fn)
+# ssvep = VisualSSVEP(duration=record_duration, save_fn=save_fn)
 ssvep.run()

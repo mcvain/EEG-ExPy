@@ -13,12 +13,16 @@ an experiment.
 #  
 # Imports
 import os
+import sys
+sys.path
+sys.path.append(r'C:\Users\mcvai\EEG-ExPy')
 from eegnb import generate_save_fn
 from eegnb.devices.eeg import EEG
-from eegnb.experiments import VisualP300
+from eegnb.experiments import VisualP300, VisualN170, VisualSSVEP, visual_baselinetask
 
 # Define some variables
-board_name = "muse2"
+# board_name = "muse2"
+board_name="generic"
 experiment = "visual_p300"
 subject_id = 0
 session_nb = 0
@@ -29,6 +33,7 @@ record_duration = 120
 # ---------------------
 #
 # Start EEG device
+# eeg_device = EEG(device=board_name)
 eeg_device = EEG(device=board_name)
 
 # Create save file name
@@ -41,4 +46,5 @@ print(save_fn)
 #
 # Create Experiment Object
 p300 = VisualP300(duration=record_duration, eeg=eeg_device, save_fn=save_fn)
+# p300 = VisualP300(duration=record_duration, save_fn=save_fn)
 p300.run()

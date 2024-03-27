@@ -30,7 +30,7 @@ from eegnb.devices.eeg import EEG
 
 class BaseExperiment:
 
-    def __init__(self, exp_name, duration, eeg, save_fn, n_trials, iti, soa, jitter):
+    def __init__(self, exp_name, duration, eeg, save_fn, n_trials, iti, soa, jitter, oddballp):
         """ Initializer for the Base Experiment Class """
 
         self.exp_name = exp_name
@@ -43,6 +43,7 @@ class BaseExperiment:
         self.iti = iti
         self.soa = soa
         self.jitter = jitter
+        self.oddballp = oddballp
         
     @abstractmethod
     def load_stimulus(self):
@@ -66,17 +67,17 @@ class BaseExperiment:
         raise NotImplementedError
 
     def setup(self, instructions=True):
-
+        core.checkPygletDuringWait = True
         # Initializing the record duration and the marker names
         self.record_duration = np.float32(self.duration)
         self.markernames = [1, 2]
         
         # Setting up the trial and parameter list
-        self.parameter = np.random.binomial(1, 0.5, self.n_trials)
+        self.parameter = np.random.binomial(1, self.oddballp, self.n_trials)  # second argument controls the probability of the oddball condition.
         self.trials = DataFrame(dict(parameter=self.parameter, timestamp=np.zeros(self.n_trials)))
 
         # Setting up Graphics 
-        self.window = visual.Window([1600, 900], monitor="testMonitor", units="deg", fullscr=True) 
+        self.window = visual.Window([1600, 900], monitor="testMonitor", units="deg", fullscr=False) 
         
         # Loading the stimulus from the specific experiment, throws an error if not overwritten in the specific experiment
         self.stim = self.load_stimulus()
@@ -121,23 +122,37 @@ class BaseExperiment:
         event.waitKeys(keyList="space")
 
         # Enabling the cursor again
-        self.window.mouseVisible = True
+        # self.window.mouseVisible = True
        
     def run(self, instructions=True):
         """ Do the present operation for a bunch of experiments """
 
-        # Setup the experiment, alternatively could get rid of this line, something to think about
-        self.setup(instructions)
+        if self.eeg.backend != "generic": 
+            # Setup the experiment, alternatively could get rid of this line, something to think about
+            self.setup(instructions)
 
-        print("Wait for the EEG-stream to start...")
+            print("Wait for the EEG-stream to start...")
 
-        # Start EEG Stream, wait for signal to settle, and then pull timestamp for start point
-        if self.eeg:
-            self.eeg.start(self.save_fn, duration=self.record_duration + 5)
+            # Start EEG Stream, wait for signal to settle, and then pull timestamp for start point
+            if self.eeg:
+                self.eeg.start(self.save_fn, duration=self.record_duration + 5) 
 
-        print("EEG Stream started")
+            print("EEG Stream started")
+
+        else:  # if using generic, we need to be able to confirm and select the stream on LabRecorder, so the stream is created before the experiment setup. Also don't need duration
+            print("Wait for the EEG-stream to start...")
+
+            # Start EEG Stream, wait for signal to settle, and then pull timestamp for start point
+            if self.eeg:
+                self.eeg.start(self.save_fn) 
+
+            print("EEG Stream started")
+
+            # Setup the experiment, alternatively could get rid of this line, something to think about
+            self.setup(instructions)
 
         start = time()
+        psycho_clock = core.MonotonicClock()
         
         # Iterate through the events
         for ii, trial in self.trials.iterrows():
@@ -147,13 +162,20 @@ class BaseExperiment:
 
             # Stimulus presentation overwritten by specific experiment
             self.present_stimulus(ii, trial)
+            
 
             # Offset
             core.wait(self.soa)
+            pressed = event.getKeys(keyList=['f'], modifiers=False, timeStamped=psycho_clock)  # according to documentation, calling this after core.wait is correct    
+            if pressed:
+                self.eeg.push_sample(marker=[9], timestamp=start+pressed[0][1])
             self.window.flip()
 
             # Exiting the loop condition, looks ugly and needs to be fixed
-            if len(event.getKeys()) > 0 or (time() - start) > self.record_duration:
+            # if len(event.getKeys()) > 0 or (time() - start) > self.record_duration:
+            #     break
+
+            if 'escape' in event.getKeys() or (time() - start) > self.record_duration:
                 break
 
             # Clearing the screen for the next trial    

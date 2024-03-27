@@ -29,6 +29,9 @@ warnings.filterwarnings('ignore')
 # MNE functions
 from mne import Epochs,find_events
 
+import sys
+sys.path
+sys.path.append(r'C:\Users\mcvai\EEG-ExPy')
 # EEG-Notebooks functions
 from eegnb.analysis.utils import load_data,plot_conditions
 from eegnb.datasets import fetch_dataset
@@ -107,4 +110,4 @@ for i in [0,2]: ax[i].set_ylim([-0.5e6,0.5e6])
 for i in [1,3]: ax[i].set_ylim([-1.5e6,2.5e6])
 
 plt.tight_layout()
-
+plt.show(block=True)
