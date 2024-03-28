@@ -28,6 +28,9 @@ from matplotlib import pyplot as plt
 from mne import Epochs,find_events
 from mne.time_frequency import tfr_morlet
 
+import sys
+sys.path
+sys.path.append(r'C:\Users\mcvai\EEG-ExPy')
 # EEG-Notebooks functions
 from eegnb.analysis.utils import load_data,plot_conditions
 from eegnb.datasets import fetch_dataset

@@ -36,7 +36,8 @@ class AuditoryOddball(Experiment.BaseExperiment):
         """
 
         exp_name = "Auditory Oddball"
-        super().__init__(exp_name, duration, eeg, save_fn, n_trials, iti, soa, jitter)
+        oddballp = 0.2
+        super().__init__(exp_name, duration, eeg, save_fn, n_trials, iti, soa, jitter, oddballp)
         self.secs = secs
         self.volume = volume
         self.random_state = random_state
